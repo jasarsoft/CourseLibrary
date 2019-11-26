@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Profiles
 {
-    public class AuthorProfile : Profile
+    public class AuthorsProfile : Profile
     {
-        public AuthorProfile()
+        public AuthorsProfile()
         {
             CreateMap<Entities.Author, Models.AuthorDto>()
                 .ForMember(
