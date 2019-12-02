@@ -70,7 +70,7 @@ namespace CourseLibrary.API.Controllers
                 courseToReturn);
         }
 
-        [HttpPut("{courseId")]
+        [HttpPut("{courseId}")]
         public ActionResult UpdateCourseForAuthor(Guid authorId, Guid courseId, CourseForUpdateDto course)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))
