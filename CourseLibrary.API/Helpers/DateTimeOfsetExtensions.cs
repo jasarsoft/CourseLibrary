@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Helpers
 {
-    public static class DateTimeOfsetExtensions
+    public static class DateTimeOffsetExtensions
     {
         public static int GetCurrentAge(this DateTimeOffset dateTimeOffset)
         {
