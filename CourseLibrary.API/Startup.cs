@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using Newtonsoft.Json.Serialization;
 
 namespace CourseLibrary.API
 {
@@ -28,27 +29,32 @@ namespace CourseLibrary.API
             services.AddControllers(setupAction =>
             {
                 setupAction.ReturnHttpNotAcceptable = true;
-            }).AddXmlDataContractSerializerFormatters()
-            .ConfigureApiBehaviorOptions(setupAction =>
-            {
-                setupAction.InvalidModelStateResponseFactory = context =>
+            })
+                .AddNewtonsoftJson(setupAction =>
                 {
-                    var problemDetails = new ValidationProblemDetails(context.ModelState)
+                    setupAction.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                })
+                .AddXmlDataContractSerializerFormatters()
+                .ConfigureApiBehaviorOptions(setupAction => 
+                {
+                    setupAction.InvalidModelStateResponseFactory = context =>
                     {
-                        Type = "https://courselibrary.com/modelvalidationproblem",
-                        Title = "One or more model validation errors occurred.",
-                        Status = StatusCodes.Status422UnprocessableEntity,
-                        Detail = "See the errors property for details.",
-                        Instance = context.HttpContext.Request.Path
-                    };
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Type = "https://courselibrary.com/modelvalidationproblem",
+                            Title = "One or more model validation errors occurred.",
+                            Status = StatusCodes.Status422UnprocessableEntity,
+                            Detail = "See the errors property for details.",
+                            Instance = context.HttpContext.Request.Path
+                        };
 
-                    problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+                        problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
 
-                    return new UnprocessableEntityObjectResult(problemDetails)
-                    {
-                        ContentTypes = { "application/problem+json" }
+                        return new UnprocessableEntityObjectResult(problemDetails)
+                        {
+                            ContentTypes = { "application/problem+json" }
+                        };
                     };
-                };
             });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -98,6 +99,34 @@ namespace CourseLibrary.API.Controllers
             _courseLibraryRepository.UpdateCourse(courseForAuthorFromRepo);
 
             _courseLibraryRepository.Save();
+            return NoContent();
+        }
+
+        [HttpPatch("{courseId}")]
+        public ActionResult PartiallyUpdateCourseForAuthor(Guid authorId, Guid courseId,
+            JsonPatchDocument<CourseForUpdateDto> patchDocument)
+        {
+            if (!_courseLibraryRepository.AuthorExists((authorId)))
+            {
+                return NotFound();
+            }
+
+            var courseForAuthorFromRepo = _courseLibraryRepository.GetCourse(authorId, courseId);
+
+            if (courseForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var courseToPatch = _mapper.Map<CourseForUpdateDto>(courseForAuthorFromRepo);
+            // add validation
+            patchDocument.ApplyTo(courseToPatch);
+
+            _mapper.Map(courseToPatch, courseForAuthorFromRepo);
+
+            _courseLibraryRepository.UpdateCourse(courseForAuthorFromRepo);
+            _courseLibraryRepository.Save();
+
             return NoContent();
         }
     }
